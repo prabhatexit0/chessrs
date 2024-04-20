@@ -97,7 +97,7 @@ pub fn create_board() -> Board {
 impl fmt::Display for Board {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         for (i, row) in self.squares.iter().enumerate() {
-            write!(f, "{} | ", i + 1)?;
+            write!(f, "{} | ", 8 - i)?;
             for square in row {
                 write!(f, "{} ", square)?;
             }
