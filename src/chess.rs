@@ -1,4 +1,5 @@
 use colored::*;
+use std::fmt;
 
 #[derive(Copy, Clone)]
 enum PieceType {
@@ -25,6 +26,29 @@ struct Piece {
 #[derive(Copy, Clone)]
 struct Square {
     piece: Option<Piece>,
+}
+
+impl fmt::Display for Square {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match &self.piece {
+            Some(piece) => {
+                let piece_char = match piece.piece_type {
+                    PieceType::King => 'K',
+                    PieceType::Queen => 'Q',
+                    PieceType::Rook => 'R',
+                    PieceType::Bishop => 'B',
+                    PieceType::Knight => 'N',
+                    PieceType::Pawn => 'P',
+                };
+                let piece_char = match piece.color {
+                    PieceColor::White => piece_char.to_string().color("Yellow"),
+                    PieceColor::Black => piece_char.to_ascii_lowercase().to_string().color("Blue"),
+                };
+                write!(f, "{}", piece_char)
+            }
+            None => write!(f, " "),
+        }
+    }
 }
 
 pub struct Board {
@@ -70,39 +94,22 @@ pub fn create_board() -> Board {
     Board { squares }
 }
 
-pub fn print_board(board: &Board) {
-    board.squares.iter().enumerate().for_each(|(i, row)| {
-        print!("{} | ", i + 1);
-        for square in row {
-            match &square.piece {
-                Some(piece) => {
-                    let piece_char = match piece.piece_type {
-                        PieceType::King => 'K',
-                        PieceType::Queen => 'Q',
-                        PieceType::Rook => 'R',
-                        PieceType::Bishop => 'B',
-                        PieceType::Knight => 'N',
-                        PieceType::Pawn => 'P',
-                    };
-                    let piece_char = match piece.color {
-                        PieceColor::White => piece_char.to_string().color("Yellow"),
-                        PieceColor::Black => {
-                            piece_char.to_ascii_lowercase().to_string().color("Blue")
-                        }
-                    };
-                    print!("{} ", piece_char);
-                }
-                None => print!(" "),
+impl fmt::Display for Board {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        for (i, row) in self.squares.iter().enumerate() {
+            write!(f, "{} | ", i + 1)?;
+            for square in row {
+                write!(f, "{} ", square)?;
             }
+            writeln!(f)?;
         }
-        println!();
-    });
 
-    println!("   {}", "-".repeat(16));
-    print!("   ");
-    for i in 0..8 {
-        print!(" {}", (b'A' + i) as char);
+        writeln!(f, "   {}", "-".repeat(16))?;
+        write!(f, "   ")?;
+        for i in 0..8 {
+            write!(f, " {}", (b'A' + i) as char)?;
+        }
+
+        writeln!(f)
     }
-
-    println!();
 }
