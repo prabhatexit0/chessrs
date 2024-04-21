@@ -1,4 +1,5 @@
 use colored::*;
+use std::collections::HashMap;
 use std::fmt;
 
 #[derive(Copy, Clone)]
@@ -24,12 +25,12 @@ struct Piece {
 }
 
 #[derive(Copy, Clone)]
-struct Square {
+pub struct Square {
     piece: Option<Piece>,
 }
 
 impl fmt::Display for Square {
-  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match &self.piece {
             Some(piece) => {
                 let piece_char = match piece.piece_type {
@@ -53,9 +54,30 @@ impl fmt::Display for Square {
 
 pub struct Board {
     squares: [[Square; 8]; 8],
+    location_to_index: HashMap<String, (usize, usize)>,
 }
 
-pub fn create_board() -> Board {
+impl Board {
+    pub fn new() -> Self {
+        let mut location_to_index = HashMap::new();
+        for (i, row) in ('a'..='h').enumerate() {
+            for (j, col) in (1..=8).enumerate() {
+                location_to_index.insert(format!("{}{}", row, col), (i, j));
+            }
+        }
+
+        Self {
+            squares: create_squares(),
+            location_to_index,
+        }
+    }
+
+    pub fn get_index(&self, location: &str) -> Option<(usize, usize)> {
+        self.location_to_index.get(location).copied()
+    }
+}
+
+pub fn create_squares() -> [[Square; 8]; 8] {
     let mut squares = [[Square { piece: None }; 8]; 8];
 
     for i in 0..8 {
@@ -80,6 +102,7 @@ pub fn create_board() -> Board {
         PieceType::Knight,
         PieceType::Rook,
     ];
+
     for i in 0..8 {
         squares[0][i].piece = Some(Piece {
             piece_type: back_row[i],
@@ -91,7 +114,7 @@ pub fn create_board() -> Board {
         });
     }
 
-    Board { squares }
+    squares
 }
 
 impl fmt::Display for Board {
